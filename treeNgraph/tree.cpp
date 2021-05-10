@@ -1,4 +1,5 @@
 #include<iostream>
+#include<stack>
 #include<vector>
 #include<algorithm>
 
@@ -18,6 +19,21 @@ void preorder(TreeNode *root){
 	cout << root->val << ' ';
 	preorder(root->left);
 	preorder(root->right);
+}
+
+
+void inorderIter(TreeNode *root){
+	stack<TreeNode *> s;
+	while(root || !s.empty()){
+		while(root){
+			s.push(root);
+			root = root->left;
+		}
+		root = s.top(); s.pop();
+		cout << root->val << ' ';
+		root = root->right;
+	}
+	cout << endl;
 }
 
 void inorder(TreeNode *root){
@@ -46,8 +62,21 @@ TreeNode *construct(vector<int> &preorder, int i, int j,
 	return root;
 }
 
+TreeNode *construct(vector<int> preorder, vector<int> inorder, int &parentIndex, int l, int r){
+	if(l > r) return nullptr;
+	int mid = preorder[parentIndex];
+	int pivot = find(inorder.begin(), inorder.end(), mid) - inorder.begin();
+	TreeNode *parent = new TreeNode(mid);
+	parentIndex++;
+	parent->left = construct(preorder, inorder, parentIndex, l, pivot-1);
+	parent->right = construct(preorder, inorder, parentIndex, pivot+1, r);
+	return parent;
+}
+
 TreeNode *constructTree(vector<int> &preorder, vector<int> &inorder){ 
-	return construct(preorder, 0, preorder.size(), inorder, 0, inorder.size());	
+	//return construct(preorder, 0, preorder.size(), inorder, 0, inorder.size());	
+	int parentIndex = 0;
+	return construct(preorder, inorder, parentIndex, 0, inorder.size()-1);
 }
 
 int main(){
@@ -62,6 +91,8 @@ int main(){
 	cout << "inorder: ";
 	inorder(root);
 	cout << endl;
+	cout << "Iterative Inorder: ";
+	inorderIter(root);
 
 	cout << "postorder: ";
 	postorder(root);
